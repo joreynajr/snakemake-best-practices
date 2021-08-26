@@ -1,5 +1,5 @@
 # snakemake-best-practices
-Personal best practices with Snakemake
+Personal best practices with Snakemake 🐍
 
 Description: As I've become more familiar with snakemake there are a few tips, tricks, practices that I found extremely helpful. I always evolving my practices so this document is a statement of my current Snakemake understanding. Currently I only intend it for personal use but if this is helpeful to other then feel free to take a look. I would add that I try to come up with the good data management practices so these best-practices are not only limited to Snakemake. 
 
