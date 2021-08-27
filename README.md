@@ -7,10 +7,19 @@ Table of contents:
 - Data Provenance & Freezing
 - Reproducibility 
 
+## Re-running the pipeline
+When you first start using Snakemake it's quite easy to build rules on top of one another but pretty soon you have a web of rules that you have to handle. Before running your pipeline on a large set of samples it is best to run it on a single sample and using `--dry` and personally I think it's best to run each sample independently, things can go wrong within any rule. I also find it very important to produce the dag and visualize it. The best way I have found is to use: 1) `snakemake --jobs 1 --dag <target> | dot -Tsvg > YYYY.MM.DD.<nameOfJob>.svg` and 2) open the svg within Inkscape. 
+
+
 ## Data Freezing & Provenance
 This section is meant to capture situation where you want to keep/freeze your data. Motivation, there are a lot of times where you are asked to re-run a pipeline where several of the inputs are the same but a few of them are changed. A good example I can give for bioinformatics would be running a pipeline on GRCh37, which means using a reference file somewhere at the VERY beginning of a pipeline, and then wanting to see the results with GRCh38. To handle this situation I have created the `results/freeze`. All previously run data can be saved/moved within `results/freeze` under some appropriate name and now the new GRCh38 reference can be run within the main results directory. 
 
-However, there is another situation, it's is often the case that you need to change some input within an intermiedate rule, to handle this situation you can either copy all the data over to the datafreeze or, if you have very large files you can use softlinks, however you should make sure the files are protected so files are not easily overwritten. 
+Summary:
+1) Run the pipeline on the old data (or already have it from a previous run)
+2) Make a new folder within `results/freeze/<data freeze version XX>`
+3) Move the old data into this data freeze folder 
+
+However, there is another situation, it's is often the case that you need to change some input within an intermediate rule, to handle this situation you can either copy all the data over to the data freeze or, if you have very large files you can copy the whole directory tree using softlinks for the files, make sure your large files are write-protected. 
 
 ## Reproducibility
 ### Conda Environments
@@ -22,7 +31,9 @@ channel:
 
 If we go to https://anaconda.org/conda-forge/qt/files this qt version is not possible so installing this environment will fail. 
 
-Another thing, some linux based tools are also made available through conda but they seem to fail when installing via Snakemake. 
+The best thing to remedy this issue is to just create a new Python environment and try to re-run the whole pipeline with the lastest version of all packages. Make sure to install  packages in a very minimal way so that you can create an clean and portable yaml file.
+
+Another thing, some linux based tools are also made available through conda but they seem to fail when installing via Snakemake. You tend to run into a Multidownload error. 
 
 ## Other
 - Don't use hardlinking between rules. If fileA has timestamp Jan 1 00:00 and fileB is a hardlink made 2 weeks later later then its timestamp will be Jan 15 00:00, however since fileA and fileB are pointing to the same inode fileA's timestamp will be updated to Jan 15 00:00 which will result in Snakemake thinking fileA has been updated and the whole pipeline will be re-run. Use a symlink instead or copy the entire file. If you really need to make a hardlink then there are two options: 1) limit hardlinks to rules whose output is not used in later steps or 2) use the Snakemake `ancient()` function for ALL rules which use this hardlinked file as input.  
