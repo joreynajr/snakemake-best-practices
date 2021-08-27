@@ -18,8 +18,19 @@ Summary:
 1) Run the pipeline on the old data (or already have it from a previous run)
 2) Make a new folder within `results/freeze/<data freeze version XX>`
 3) Move the old data into this data freeze folder 
+4) Run the pipeline on the new data
 
-However, there is another situation, it's is often the case that you need to change some input within an intermediate rule, to handle this situation you can either copy all the data over to the data freeze or, if you have very large files you can copy the whole directory tree using softlinks for the files, make sure your large files are write-protected. 
+However, there is another situation, it's is often the case that you need to change some input within an intermediate rule, to handle this situation you can either copy all the data over to the data freeze or, if you have very large files you can copy the whole directory tree using softlinks for the files, make sure your large files are write-protected. To do this I will follow these steps:
+1) Run the pipeline on the old data (or already have it from a previous run)
+2) Make a new folder within `results/freeze/<data freeze version XX>`
+3) Move the old data into this data freeze folder 
+4) Copy the directory tree from part 3 using `cp -r -s {old tree absolute path} {new tree relative path}`
+5) Remove the symlink to the file you want to replace (IMPORTANT)
+6) Copy/add the new input file accordingly 
+7) Run `snakemake --jobs 1 --detailed-summary {target}`
+8) Search the detail summary for files that will be updated as a result of adding the new input file
+9) Remove all symlinked files which are listed in step 8
+10) Run `snakemake --profile {profile} {target}` to generate your new set of results 
 
 ## Reproducibility
 ### Conda Environments
