@@ -32,6 +32,9 @@ However, there is another situation, it's is often the case that you need to cha
 9) Remove all symlinked files which are listed in step 8
 10) Run `snakemake --profile {profile} {target}` to generate your new set of results 
 
+Other:
+- I'm trying to understand how to best protect files especially frozen ones where you still want to share some files. `chmod 444` can make a file write protected. I was also thinking of `chattr i` which make a file immutable but you also can't make any time of link to this file as well as chattr's limitation to certain file systems. 
+
 ## Reproducibility
 ### Conda Environments
 I have struggled with this one for a long time. Here are a few caveats with conda, you can always Google a packages and software with conda and you'll get the code that would make this possible. Now, if your project is older then the packages have all updated and conda stops supporting them so making yaml files of old environments can be problematic, causing you to remove versions of packages in favor of the latest release that conda will automatically install. I just want to add some concreteness to what I'm trying to say, let's say we have the following yaml file:
