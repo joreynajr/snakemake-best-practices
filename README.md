@@ -8,8 +8,9 @@ Table of contents:
 - Reproducibility 
 
 ## Re-running the pipeline
-When you first start using Snakemake it's quite easy to build rules on top of one another but pretty soon you have a web of rules that you have to handle. Before running your pipeline on a large set of samples it is best to run it on a single sample and using `--dry` and personally I think it's best to run each sample independently, things can go wrong within any rule. I also find it very important to produce the dag and visualize it. The best way I have found is to use: 1) `snakemake --jobs 1 --dag <target> | dot -Tsvg > YYYY.MM.DD.<nameOfJob>.svg` and 2) open the svg within Inkscape. 
+When you first start using Snakemake it's quite easy to build rules on top of one another but pretty soon you have a web of rules that you have to handle. Before running your pipeline on a large set of samples it is best to run it on a single sample and using `--dry` and personally I think it's best to run each sample independently, things can go wrong within any rule. I also find it very important to produce the dag and visualize it. The best way I have found is to use: 1) `snakemake --jobs 1 --dag <target> | dot -Tsvg > YYYY.MM.DD.<nameOfJob>.svg` and 2) open the svg within Inkscape.
 
+New idea: When running a new sample make a new dag image (i.e. results/main/<sample>/dags/<date>.<target rule>.svg).  
 
 ## Data Freezing & Provenance
 This section is meant to capture situation where you want to keep/freeze your data. Motivation, there are a lot of times where you are asked to re-run a pipeline where several of the inputs are the same but a few of them are changed. A good example I can give for bioinformatics would be running a pipeline on GRCh37, which means using a reference file somewhere at the VERY beginning of a pipeline, and then wanting to see the results with GRCh38. To handle this situation I have created the `results/freeze`. All previously run data can be saved/moved within `results/freeze` under some appropriate name and now the new GRCh38 reference can be run within the main results directory. 
@@ -18,7 +19,10 @@ Summary:
 1) Run the pipeline on the old data (or already have it from a previous run)
 2) Make a new folder within `results/freeze/<data freeze version XX>`
 3) Move the old data into this data freeze folder 
-4) Run the pipeline on the new data
+4) [optional] Copy with softlinking the directory branches you want to 
+keep the same between the frozen data and the new data. Best to use 
+`cp -r -s --preserve=timestamps <absPath to frozen branch> <new path>`
+5) Run the pipeline on the new data
 
 However, there is another situation, it's is often the case that you need to change some input within an intermediate rule, to handle this situation you can either copy all the data over to the data freeze or, if you have very large files you can copy the whole directory tree using softlinks for the files, make sure your large files are write-protected. To do this I will follow these steps:
 1) Run the pipeline on the old data (or already have it from a previous run)
@@ -28,12 +32,12 @@ However, there is another situation, it's is often the case that you need to cha
 5) Remove the symlink to the file you want to replace (IMPORTANT)
 6) Copy/add the new input file accordingly 
 7) Run `snakemake --jobs 1 --detailed-summary {target}`
-8) Search the detail summary for files that will be updated as a result of adding the new input file
+8) Search the detailed summary for files that will be updated as a result of adding the new input file
 9) Remove all symlinked files which are listed in step 8
 10) Run `snakemake --profile {profile} {target}` to generate your new set of results 
 
 Other:
-- I'm trying to understand how to best protect files especially frozen ones where you still want to share some files. `chmod 444` can make a file write protected. I was also thinking of `chattr i` which make a file immutable but you also can't make any time of link to this file as well as chattr's limitation to certain file systems. 
+- I'm trying to understand how to best protect files especially frozen ones where you still want to share some files. `chmod 444` can make a file write protected. I was also thinking of `chattr i` which makes a file immutable but you also can't make any kind of link (soft nor hard) to this file as well as chattr's limitation to certain file systems. 
 
 ## Reproducibility
 ### Conda Environments
