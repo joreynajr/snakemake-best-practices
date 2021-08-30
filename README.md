@@ -4,15 +4,29 @@ Personal best practices with Snakemake 🐍
 Description: As I've become more familiar with snakemake there are a few tips, tricks, practices that I found extremely helpful. I always evolving my practices so this document is a statement of my current Snakemake understanding. Currently I only intend it for personal use but if this is helpeful to other then feel free to take a look. I would add that I try to come up with the good data management practices so these best-practices are not only limited to Snakemake. 
 
 Table of contents:
-- Data Provenance & Freezing
+- Developing a Pipeline 
+- Data Freezing, Provenance and Re-running the Pipeline 
 - Reproducibility 
 
-## Re-running the pipeline
-When you first start using Snakemake it's quite easy to build rules on top of one another but pretty soon you have a web of rules that you have to handle. Before running your pipeline on a large set of samples it is best to run it on a single sample and using `--dry` and personally I think it's best to run each sample independently, things can go wrong within any rule. I also find it very important to produce the dag and visualize it. The best way I have found is to use: 1) `snakemake --jobs 1 --dag <target> | dot -Tsvg > YYYY.MM.DD.<nameOfJob>.svg` and 2) open the svg within Inkscape.
+## Developing a Pipeline
+When you first start using Snakemake it's quite easy to build rules on top of one another but pretty soon you have a web of rules that you have to handle. Before running your pipeline on a large set of samples it is best to run it on a single sample and using `--dry` and personally I think it's best to run each sample independently, things can go wrong within any rule. I also find it very important to produce the dag and visualize it. The best way I have found is to use: 1) `snakemake --jobs 1 --dag <target> | dot -Tsvg > YYYY.MM.DD.<nameOfJob>.svg` and 2) open the svg within Inkscape. There are a few dags you can visualize actually and I will list then below:
+- dag:
+  -  best for debugging
+  -  shows where the wildcards are first assigned
+  -  uses solid borders for out-dated/unrun rules/files and dashed borders for up-to-date rules/files
+- rulegraph:
+  -  best for final pipeline visualization with **rules only**
+  -  DOES NOT shows where the wildcards are first assigned (makes for a cleaner looking dag)
+  -  DOES NOT use solid/dashed borders for rule/file status
+- filegraph:
+  - best for final pipeline visualization with **file paths**
+  - shows wildcards in all rules/files (makes a messier looking dag)
+  - can also be used for debugging however you have to replace the wildcards 
+  - DOES NOT use solid/dashed borders for rule/file status
 
 New idea: When running a new sample make a new dag image (i.e. results/main/<sample>/dags/<date>.<target rule>.svg).  
 
-## Data Freezing & Provenance
+## Data Freezing, Provenance and Re-running the Pipeline 
 This section is meant to capture situation where you want to keep/freeze your data. Motivation, there are a lot of times where you are asked to re-run a pipeline where several of the inputs are the same but a few of them are changed. A good example I can give for bioinformatics would be running a pipeline on GRCh37, which means using a reference file somewhere at the VERY beginning of a pipeline, and then wanting to see the results with GRCh38. To handle this situation I have created the `results/freeze`. All previously run data can be saved/moved within `results/freeze` under some appropriate name and now the new GRCh38 reference can be run within the main results directory. 
 
 Summary:
