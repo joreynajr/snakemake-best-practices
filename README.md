@@ -23,7 +23,7 @@ Snakemake will always analyze the timestamp of your file so you should become we
 Extra notes: 
 - For clarification on modification time and change time check out the link [here](https://askubuntu.com/a/600859).
 - Hardlinking with `ln` will NOT preserve the timestamp of the source file, rather than using `ln` use `cp -l --preserve=timestamps`
-- Softlinking with `ln -s` will NOT preserve the timestamp of the source file, rather that use `ln -s` use `cp -s --preserve=timestamps`
+- Softlinking with `ln -s` will NOT preserve the timestamp of the source file, rather than using `ln -s` use `cp -s --preserve=timestamps`
 - Hardlinking and softlinking whole directories trees is possible using `cp -r -l` or `cp -r -s` respectively. These commands will recreate the whole directory structures and finally link the files accordingly (rather that linking the source directory only)
 
 ## Developing a Pipeline
