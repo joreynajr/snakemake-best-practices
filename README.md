@@ -1,12 +1,30 @@
 # snakemake-best-practices
 Personal best practices with Snakemake 🐍
 
-Description: As I've become more familiar with snakemake there are a few tips, tricks, practices that I found extremely helpful. I always evolving my practices so this document is a statement of my current Snakemake understanding. Currently I only intend it for personal use but if this is helpeful to other then feel free to take a look. I would add that I try to come up with the good data management practices so these best-practices are not only limited to Snakemake. 
+Description: As I've become more familiar with snakemake there are a few tips, tricks, practices that I found extremely helpful. I am always evolving my practices so this document is a statement of my current Snakemake understanding. Currently I only intend it for personal use but if this is helpeful to others then feel free to take a look. I would add that I try to come up with the good data management practices so these best-practices are not only limited to Snakemake. Lastly, the Snakemake documentation is very comprehensive so always refer to this document for most things.
 
 Table of contents:
+- Learning Snakemake
 - Developing a Pipeline 
 - Data Freezing, Provenance and Re-running the Pipeline 
 - Reproducibility 
+
+## Learning Snakemake 
+There are several key ingredients to making a flexible and reproducible pipeline with snakemake. A seasoned programmer will not struggle with some of what I'm about to suggest but this part is really meant for beginners.
+
+### Generate command line scripts 
+Python and other languages have very powerful command line parsing libraries/packages that make it possible to easily transform a hard-coded piece of software into a much more dynamic and command-line friendly piece of code. For Python I highly recommend using [argparse](https://docs.python.org/3/library/argparse.html) and R even supports the use of an R tailered [argparse](https://cran.r-project.org/web/packages/argparse/index.html). 
+
+### Following the Snakemake tutorial
+It goes without saying that you should go through the Snakemake [tutorial](https://snakemake.readthedocs.io/en/stable/tutorial/tutorial.html)
+
+### Learning how timestamps affects pipeline rerunning
+Snakemake will always analyze the timestamp of your file so you should become well versed in `ls -lth`, `stat`, `touch`, `hardlinking and softlinking`, etc. I've run into my own fairshare of headaches with Snakemake and a lot of times it's due to the timestamp analysis. Sometimes you might open a file with vim and accidently modify a file ever so slightly, now Snakemake thinks it has to remake this file and all downstream files as well. There are three timestamps per file: access, modification and change time. From what I have deduced Snakemake uses modification and change time. There are several ways to handle a change in modification/change time: first) re-run the pipeline (whenever computation is not prohibitive), second) manually update the timestamps, and third) use the `--touch` flag which will update the timestamps of all files without running the pipeline. The first method is the cleanest way, the second is the worst way and the third ways should only be done if you are certain the changes made to a file were unconsequential to all downstream jobs. 
+Extra notes: 
+- For clarification on modification time and change time check out the link [here](https://askubuntu.com/a/600859).
+- Hardlinking with `ln` will NOT preserve the timestamp of the source file, rather than using `ln` use `cp -l --preserve=timestamps`
+- Softlinking with `ln -s` will NOT preserve the timestamp of the source file, rather that use `ln -s` use `cp -s --preserve=timestamps`
+- Hardlinking and softlinking whole directories trees is possible using `cp -r -l` or `cp -r -s` respectively. These commands will recreate the whole directory structures and finally link the files accordingly (rather that linking the source directory only)
 
 ## Developing a Pipeline
 When you first start using Snakemake it's quite easy to build rules on top of one another but pretty soon you have a web of rules that you have to handle. Before running your pipeline on a large set of samples it is best to run it on a single sample and using `--dry` and personally I think it's best to run each sample independently, things can go wrong within any rule. I also find it very important to produce the dag and visualize it. The best way I have found is to use: 1) `snakemake --jobs 1 --dag <target> | dot -Tsvg > YYYY.MM.DD.<nameOfJob>.svg` and 2) open the svg within Inkscape. There are a few dags you can visualize actually and I will list then below:
