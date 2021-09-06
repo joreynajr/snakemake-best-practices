@@ -42,7 +42,13 @@ When you first start using Snakemake it's quite easy to build rules on top of on
   - can also be used for debugging however you have to replace the wildcards 
   - DOES NOT use solid/dashed borders for rule/file status
 
-New idea: When running a new sample make a new dag image (i.e. results/main/<sample>/dags/<date>.<target rule>.svg).  
+New idea: When running a new sample make a new dag image (i.e. results/main/<sample>/dags/<date>.<target rule>.svg). 
+  
+### Using directories as outputs
+Several times it's tempting to use directories as outputs however directories as output produces what I like to call a manual-stall. Normally you have a large rulegraph connecting several rules together however, when one of those rules is a manual-stall you are asking the user to manually run this rule thus creating a slight disjunction in the way you run the pipeline. Say you have a dag A --> B --> C without a manual-stall. The user can just invoke rule C and Snakemake would run rule A then rule B then rule C, however if there is a manual-stall in rule B then the user will have to run rule B, wait for it to finish, then invoke rule C. This might be by design, by technicial limitations (etc) but whatever the case, it's something you have to be aware of as well as something you'll have to walk your user through. At this point in my Snakemake practice I've included several rules that use directories as output but I'm moving away from this in favor of specifiying files I will use downsteam of a potentially manual-stall rules.  
+  
+### Using Checkpoints
+  Coming soon
 
 ## Data Freezing, Provenance and Re-running the Pipeline 
 This section is meant to capture situation where you want to keep/freeze your data. Motivation, there are a lot of times where you are asked to re-run a pipeline where several of the inputs are the same but a few of them are changed. A good example I can give for bioinformatics would be running a pipeline on GRCh37, which means using a reference file somewhere at the VERY beginning of a pipeline, and then wanting to see the results with GRCh38. To handle this situation I have created the `results/freeze`. All previously run data can be saved/moved within `results/freeze` under some appropriate name and now the new GRCh38 reference can be run within the main results directory. 
